@@ -12,9 +12,8 @@ use image::{DynamicImage, load_from_memory};
 use rand::distributions::Alphanumeric;
 use rand::prelude::SliceRandom;
 use rand::{Rng, thread_rng};
-use tracing_subscriber::fmt::format;
 
-use super::filetype::{Type, get_sig};
+use super::filetype::{get_sig, Type};
 use crate::core::error::FluxError;
 use crate::core::media_container::DecodeLimits;
 use crate::util::owned_child::IntoOwnedChild;

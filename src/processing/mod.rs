@@ -1,7 +1,7 @@
 use std::f32::consts::PI;
 use std::simd::cmp::SimdPartialOrd;
 use std::simd::num::SimdFloat;
-use std::simd::{f32x8, u32x8};
+use std::simd::{f32x8, u32x8, Select};
 
 use image::imageops::overlay;
 use image::{DynamicImage, GenericImage, GenericImageView};
@@ -179,12 +179,12 @@ pub unsafe fn swirl(img: &DynamicImage, intensity: f32) -> DynamicImage {
             ys - f32x8::splat(height as f32) / f32x8::splat(2.0),
         );
 
-        let dists: f32x8 = sqrt_v8f32(x_dists * x_dists + y_dists * y_dists);
+        let dists: f32x8 = unsafe { sqrt_v8f32(x_dists * x_dists + y_dists * y_dists) };
 
         let angles_in: f32x8 = dists / f32x8::splat(img.width() as f32) * f32x8::splat(2.0) * f32x8::splat(PI);
-        let angles: f32x8 = sin_v8f32(angles_in) * f32x8::splat(intensity);
+        let angles: f32x8 = unsafe { sin_v8f32(angles_in) } * f32x8::splat(intensity);
 
-        let (s, c) = (sin_v8f32(angles), cos_v8f32(angles));
+        let (s, c) = unsafe { (sin_v8f32(angles), cos_v8f32(angles)) };
 
         let xes_in = x_dists * c // cosine
             - y_dists * s // sine
@@ -195,7 +195,7 @@ pub unsafe fn swirl(img: &DynamicImage, intensity: f32) -> DynamicImage {
             + f32x8::splat((height + 1) as f32)
             / f32x8::splat(2.0);
 
-        let (xes_new, ys_new) = (floor_v8f32(xes_in).cast::<u32>(), floor_v8f32(ys_in).cast::<u32>());
+        let (xes_new, ys_new) = unsafe { (floor_v8f32(xes_in).cast::<u32>(), floor_v8f32(ys_in).cast::<u32>()) };
 
         let maxx = u32x8::splat((width - 1) as u32);
         let maxy = u32x8::splat((height - 1) as u32);
@@ -216,11 +216,13 @@ pub unsafe fn swirl(img: &DynamicImage, intensity: f32) -> DynamicImage {
         let ys_arr = clamped_ys.as_array();
 
         for i in 0..8u32 {
-            out_img.unsafe_put_pixel(
-                (x + i) % (width),
-                y + (x + i) / width,
-                img.unsafe_get_pixel(xes_arr[i as usize] as _, ys_arr[i as usize] as _),
-            );
+            unsafe {
+                out_img.unsafe_put_pixel(
+                    (x + i) % (width),
+                    y + (x + i) / width,
+                    img.unsafe_get_pixel(xes_arr[i as usize] as _, ys_arr[i as usize] as _),
+                );
+            }
         }
 
         (y, x) = (y + (x + 8) / width, (x + 8) % width);
@@ -236,8 +238,8 @@ pub unsafe fn swirl(img: &DynamicImage, intensity: f32) -> DynamicImage {
                 height,
                 intensity,
             );
-            let px = img.unsafe_get_pixel(out.0, out.1);
-            out_img.unsafe_put_pixel((x + i) % width, y + (x + i) / width, px);
+            let px = unsafe { img.unsafe_get_pixel(out.0, out.1) };
+            unsafe { out_img.unsafe_put_pixel((x + i) % width, y + (x + i) / width, px) };
         }
     }
 

@@ -4,7 +4,6 @@
     core_intrinsics,
     try_trait_v2,
     exitcode_exit_method,
-    compiler_builtins,
     portable_simd,
     link_llvm_intrinsics,
     simd_ffi

@@ -17,7 +17,7 @@ pub enum MediaObject {
     DynamicImages(DynamicImagesMediaObject),
 }
 impl MediaObject {
-    pub fn to_dynamic_images(&self, limits: &DecodeLimits) -> Result<Cow<DynamicImagesMediaObject>, FluxError> {
+    pub fn to_dynamic_images(&self, limits: &DecodeLimits) -> Result<Cow<'_, DynamicImagesMediaObject>, FluxError> {
         match self {
             Self::DynamicImages(x) => Ok(Cow::Borrowed(x)),
             Self::Encoded(e) => Ok(Cow::Owned(decode_to_dynamic_images(e, limits)?)),

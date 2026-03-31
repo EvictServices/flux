@@ -21,3 +21,6 @@ Cargo.lock
 profile.json
 /test
 **/*.swp
+vips/
+vips-*/
+vips-*.tar.xz

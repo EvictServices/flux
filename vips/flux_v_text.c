@@ -64,7 +64,7 @@ int v_generate_meme_text(char **buf, size_t *size, size_t height, size_t width, 
 	asprintf(&font, "Impact,Twemoji Color Emoji");
 
 	RETURN_NONZERO(
-		vips_text(&image, text, "font", font, "rgba", 1, "width", textwidth, "height", height, "align", VIPS_ALIGN_CENTRE, "wrap", VIPS_TEXT_WRAP_WORD_CHAR, NULL))
+		vips_text(&image, text, "font", font, "rgba", 1, "width", textwidth, "height", height, "align", VIPS_ALIGN_CENTRE, NULL))
 
 	RETURN_NONZERO(
 		vips_gaussmat(&mask, radius / 2, 0.1, "separable", 1, NULL))

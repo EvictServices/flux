@@ -20,7 +20,7 @@ fn main() {
     println!("cargo:rustc-env=LD_LIBRARY_PATH={}/{}", workspace, OUT_DIR);
 
     for file in C_FILES {
-        Command::new("bash")
+        let output = Command::new("bash")
             .arg("-c")
             .arg(&format!(
                 "gcc -fPIC -Wall -O2 -shared ./{0}/{1} -g -o ./{2}/lib{3}.so `pkg-config vips --cflags --libs`",
@@ -32,7 +32,15 @@ fn main() {
             .output()
             .unwrap();
 
-        println!("cargo:rerun-if-changed=natives/{}", file);
+        if !output.status.success() {
+            panic!(
+                "failed to compile native file {}: {}",
+                file,
+                String::from_utf8_lossy(&output.stderr)
+            );
+        }
+
+        println!("cargo:rerun-if-changed={}/{}", C_FILE_DIR, file);
         println!("cargo:rustc-link-lib={}", &file[..file.len() - 2]);
 
         let output = match Command::new("git").args(&["rev-parse", "--short", "HEAD"]).output() {
